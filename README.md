@@ -105,6 +105,14 @@ Print the upstream Clipbench evaluation task list and doc reference:
 uv run gallery-browser clipbench
 ```
 
+Launch a simple browser UI for gallery text search over images and videos:
+
+```bash
+uv run gallery-browser ui --gallery assets
+```
+
+Then open the local URL shown in the terminal, enter a gallery folder and description, and run search.
+
 ## Notes
 
 - The first inference run downloads model weights from Hugging Face.

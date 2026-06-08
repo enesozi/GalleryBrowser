@@ -10,6 +10,7 @@ requires-python = ">=3.12"
 dependencies = [
     "decord>=0.6.0",
     "ftfy>=6.3.1",
+    "gradio>=4.44.0",
     "perception-models",
     "xformers>=0.0.35",
 ]

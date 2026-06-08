@@ -11,6 +11,7 @@ from gallery_browser.audio_events import (
 from gallery_browser.audio_visual import DEFAULT_AV_MODEL, available_av_models, embed_audio_visual
 from gallery_browser.clipbench import clipbench_summary
 from gallery_browser.inference import DEFAULT_MODEL, available_clip_models, classify_media
+from gallery_browser.web_ui import launch_web_ui
 from gallery_browser.utils import get_audio_runtime_status
 from gallery_browser.vision import (
     DEFAULT_VISION_MODEL,
@@ -172,6 +173,33 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print the upstream Clipbench evaluation tasks and reference documentation.",
     )
     clipbench_parser.set_defaults(func=_run_clipbench)
+
+    ui_parser = subparsers.add_parser(
+        "ui",
+        help="Launch a simple browser UI for gallery folder text search.",
+    )
+    ui_parser.add_argument(
+        "--gallery",
+        default="",
+        help="Optional default gallery folder shown in the UI.",
+    )
+    ui_parser.add_argument(
+        "--host",
+        default="127.0.0.1",
+        help="Host interface for the web server.",
+    )
+    ui_parser.add_argument(
+        "--port",
+        type=int,
+        default=7860,
+        help="Port for the web server.",
+    )
+    ui_parser.add_argument(
+        "--device",
+        default="auto",
+        help="Torch device used by search in the UI backend.",
+    )
+    ui_parser.set_defaults(func=_run_ui)
     return parser
 
 
@@ -296,6 +324,15 @@ def _run_clipbench(_: argparse.Namespace) -> None:
         print(
             f"- audio and video evaluation paths may need extra system runtime support: {status.detail}"
         )
+
+
+def _run_ui(args: argparse.Namespace) -> None:
+    launch_web_ui(
+        host=args.host,
+        port=args.port,
+        gallery_dir=args.gallery,
+        device=args.device,
+    )
 
 
 if __name__ == "__main__":
