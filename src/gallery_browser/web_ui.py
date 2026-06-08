@@ -3,7 +3,7 @@ from __future__ import annotations
 import gradio as gr
 
 from .inference import DEFAULT_MODEL, available_clip_models
-from .search import search_gallery
+from .search import clear_gallery_cache, gallery_cache_info, search_gallery
 
 
 def launch_web_ui(
@@ -15,14 +15,16 @@ def launch_web_ui(
 ) -> None:
     default_gallery = gallery_dir or ""
     models = available_clip_models()
-    default_model = DEFAULT_MODEL if DEFAULT_MODEL in models else (models[0] if models else DEFAULT_MODEL)
+    default_model = (
+        DEFAULT_MODEL if DEFAULT_MODEL in models else (models[0] if models else DEFAULT_MODEL)
+    )
 
     def _run_search(
         folder: str,
         query: str,
         model_name: str,
         top_k: int,
-        frame_index: int,
+        video_frames: int,
     ) -> tuple[list[list[str | float]], str]:
         try:
             result = search_gallery(
@@ -30,31 +32,47 @@ def launch_web_ui(
                 query=query,
                 model_name=model_name,
                 top_k=top_k,
-                frame_index=frame_index,
+                video_frames=video_frames,
                 device=device,
             )
         except ValueError as exc:
             return [], f"Error: {exc}"
 
         rows = [[match.score, match.kind, match.path] for match in result.matches]
+        cache_state = "hit" if result.cache_hit else "recomputed"
         summary = (
             f"Scanned {result.scanned_files} media files. "
             f"Returned {len(result.matches)} results. "
-            f"Skipped {len(result.skipped)} files."
+            f"Skipped {len(result.skipped)} files. "
+            f"Embedding cache: {cache_state}."
         )
         return rows, summary
+
+    def _clear_cache() -> str:
+        clear_gallery_cache()
+        info = gallery_cache_info()
+        return (
+            "Cache cleared. "
+            f"Gallery cache entries: {info['gallery_entries']}. "
+            f"Model cache entries: {info['model_entries']}."
+        )
 
     with gr.Blocks(title="Gallery Browser") as demo:
         gr.Markdown("# Gallery Browser")
         gr.Markdown("Choose a gallery folder and search images/videos with a text description.")
 
-        folder = gr.Textbox(label="Gallery folder", value=default_gallery, placeholder="/path/to/gallery")
+        folder = gr.Textbox(
+            label="Gallery folder", value=default_gallery, placeholder="/path/to/gallery"
+        )
         query = gr.Textbox(label="Description query", placeholder="a dog jumping over a fence")
         model_name = gr.Dropdown(label="Model", choices=models, value=default_model)
         top_k = gr.Slider(label="Top results", minimum=1, maximum=50, value=10, step=1)
-        frame_index = gr.Number(label="Video frame index", value=0, precision=0)
+        video_frames = gr.Slider(
+            label="Video frames sampled", minimum=1, maximum=16, value=4, step=1
+        )
 
         search_button = gr.Button("Search")
+        clear_cache_button = gr.Button("Clear cache")
         results = gr.Dataframe(
             headers=["score", "kind", "path"],
             datatype=["number", "str", "str"],
@@ -67,8 +85,9 @@ def launch_web_ui(
 
         search_button.click(
             _run_search,
-            inputs=[folder, query, model_name, top_k, frame_index],
+            inputs=[folder, query, model_name, top_k, video_frames],
             outputs=[results, status],
         )
+        clear_cache_button.click(_clear_cache, inputs=None, outputs=[status])
 
     demo.launch(server_name=host, server_port=port)
