@@ -12,7 +12,11 @@ from gallery_browser.audio_visual import DEFAULT_AV_MODEL, available_av_models, 
 from gallery_browser.clipbench import clipbench_summary
 from gallery_browser.inference import DEFAULT_MODEL, available_clip_models, classify_media
 from gallery_browser.utils import get_audio_runtime_status
-from gallery_browser.vision import DEFAULT_VISION_MODEL, available_vision_models, extract_vision_features
+from gallery_browser.vision import (
+    DEFAULT_VISION_MODEL,
+    available_vision_models,
+    extract_vision_features,
+)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -289,7 +293,9 @@ def _run_clipbench(_: argparse.Namespace) -> None:
     status = get_audio_runtime_status()
     if not status.ok:
         print("runtime_note:")
-        print(f"- audio and video evaluation paths may need extra system runtime support: {status.detail}")
+        print(
+            f"- audio and video evaluation paths may need extra system runtime support: {status.detail}"
+        )
 
 
 if __name__ == "__main__":

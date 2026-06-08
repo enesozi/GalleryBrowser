@@ -73,7 +73,10 @@ def classify_media(
     image_features = image_features.detach().cpu()
     text_features = text_features.detach().cpu()
     ranked = sorted(
-        (Prediction(label=label, score=float(score)) for label, score in zip(labels, scores.tolist())),
+        (
+            Prediction(label=label, score=float(score))
+            for label, score in zip(labels, scores.tolist())
+        ),
         key=lambda item: item.score,
         reverse=True,
     )

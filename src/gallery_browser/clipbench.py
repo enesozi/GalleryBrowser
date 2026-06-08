@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-EVALUATION_DOC_URL = "https://github.com/facebookresearch/perception_models/blob/main/apps/pe/docs/evaluation.md"
+EVALUATION_DOC_URL = (
+    "https://github.com/facebookresearch/perception_models/blob/main/apps/pe/docs/evaluation.md"
+)
 
 CLIPBENCH_TASKS = [
     "zero-shot image classification",

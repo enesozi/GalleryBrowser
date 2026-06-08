@@ -5,7 +5,12 @@ from typing import Sequence
 
 import torch
 
-from .utils import get_audio_frame_transform, load_audio_frame_runtime, resolve_device, validate_parallel_lengths
+from .utils import (
+    get_audio_frame_transform,
+    load_audio_frame_runtime,
+    resolve_device,
+    validate_parallel_lengths,
+)
 
 DEFAULT_AUDIO_FRAME_MODEL = "pe-a-frame-small"
 AVAILABLE_AUDIO_FRAME_MODELS = [

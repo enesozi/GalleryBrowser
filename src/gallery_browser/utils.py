@@ -107,18 +107,29 @@ class _FallbackVideoProcessor:
         lengths = torch.tensor([video.size(0) for video in transformed])
         padding_mask = torch.arange(lengths.max())[None] < lengths[:, None]
         pixel_values = pad_sequence(transformed, batch_first=True)
-        return BatchFeature({"pixel_values_videos": pixel_values, "padding_mask_videos": padding_mask})
+        return BatchFeature(
+            {"pixel_values_videos": pixel_values, "padding_mask_videos": padding_mask}
+        )
 
 
 class FallbackPEAudioVisualTransform:
-    def __init__(self, tokenizer, audio_processor: _FallbackAudioProcessor, video_processor: _FallbackVideoProcessor):
+    def __init__(
+        self,
+        tokenizer,
+        audio_processor: _FallbackAudioProcessor,
+        video_processor: _FallbackVideoProcessor,
+    ):
         self.tokenizer = tokenizer
         self.audio_processor = audio_processor
         self.video_processor = video_processor
 
     @classmethod
-    def from_model_name_and_config(cls, model_name: str, config) -> "FallbackPEAudioVisualTransform":
-        checkpoint_dir = snapshot_download(repo_id=f"facebook/{model_name}", revision="perception_models")
+    def from_model_name_and_config(
+        cls, model_name: str, config
+    ) -> "FallbackPEAudioVisualTransform":
+        checkpoint_dir = snapshot_download(
+            repo_id=f"facebook/{model_name}", revision="perception_models"
+        )
         vision_config = PE_VISION_CONFIG[config.audio_visual_model.visual_model.pe_encoder]
         return cls(
             tokenizer=AutoTokenizer.from_pretrained(checkpoint_dir),
@@ -164,7 +175,9 @@ class FallbackPEAudioFrameTransform:
 
     @classmethod
     def from_model_name_and_config(cls, model_name: str, config) -> "FallbackPEAudioFrameTransform":
-        checkpoint_dir = snapshot_download(repo_id=f"facebook/{model_name}", revision="perception_models")
+        checkpoint_dir = snapshot_download(
+            repo_id=f"facebook/{model_name}", revision="perception_models"
+        )
         return cls(
             tokenizer=AutoTokenizer.from_pretrained(checkpoint_dir),
             audio_processor=_FallbackAudioProcessor(
@@ -173,7 +186,9 @@ class FallbackPEAudioFrameTransform:
             ),
         )
 
-    def __call__(self, *, text: list[str] | None = None, audio: list[str] | None = None) -> BatchFeature:
+    def __call__(
+        self, *, text: list[str] | None = None, audio: list[str] | None = None
+    ) -> BatchFeature:
         batch = BatchFeature()
         if text is not None:
             batch.update(
@@ -230,7 +245,9 @@ def validate_parallel_lengths(**items: list[str] | None) -> None:
     distinct = {length for length in lengths.values() if length > 1}
     if len(distinct) > 1:
         pairs = ", ".join(f"{name}={length}" for name, length in lengths.items())
-        raise ValueError(f"Input lists must have matching lengths when batching modalities: {pairs}")
+        raise ValueError(
+            f"Input lists must have matching lengths when batching modalities: {pairs}"
+        )
 
 
 def load_audio_visual_runtime():
